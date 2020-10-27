@@ -1,0 +1,94 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-5">
+    <form id="signup_form" action="{% url 'register_view' %}" method="post">
+        {% csrf_token %}
+        {% for error in form.non_field_errors %}
+        <div class="alert alert-danger" role="alert"> {{ error }}</div>
+        {% endfor %}
+        {{ form.as_p }}
+        <button>Submit</button>
+    </form>
+</div>
+
+<div class="container mt-4">
+    <table class="table table-striped">
+        <thead>
+          <tr>
+            <th scope="col">#</th>
+            <th scope="col">First</th>
+            <th scope="col">Last</th>
+            <th scope="col">username</th>
+            <th scope="col">Email</th>
+          </tr>
+        </thead>
+        <tbody id="user_tbody">
+          
+        </tbody>
+      </table>
+</div>
+{% endblock %}
+
+{% block js %}
+<script>
+    (function($) {
+        let signUpForm = $('#signup_form');
+        signUpForm.on('submit', function(e) {
+            // Signup form ajax submission
+            e.preventDefault();
+            let $this = $(this);
+            let method = $this.attr('method');
+            let endpoint = $(this).attr('action');
+            let data = $this.serialize();
+            $.ajax({
+                method: method,
+                url: endpoint,
+                data: data,
+                success: function(resonse) {
+                    console.log(resonse)
+                    if (resonse.success){
+                        signUpForm[0].reset()
+                        alert('succesfully registered')
+                    } else{
+                        alert('data not valid registered')
+                    }
+                },
+                error: function({responseText}) {
+                    console.log(responseText)
+                    alert('form data not vaild')
+                }
+            })
+        });
+        let loadingUserData = function() {
+            let renderId = $('user-tbody');
+            let renderData = ''
+            $.ajax({
+                method: 'get',
+                url: "{% url 'json_user_list' %}",
+                success: function({users}) {
+                    console.dir(JSON.parse(users))
+                    JSON.parse(users).forEach((item, index) => {
+                        console.log(item.first_name)
+                    })
+                    for (let [first_name, last_name, username, email] of Object.entries(JSON.parse(users))){
+                        console.log(first_name, last_name, username)
+                    }
+                    `
+                    <tr>
+            <th scope="row">1</th>
+            <td>Mark</td>
+            <td>Otto</td>
+            <td>@mdo</td>
+          </tr>
+                    `
+                },
+                error: function(err){
+                    console.log(err)
+                }
+            })
+        }
+        loadingUserData()
+    }(jQuery));
+</script>
+{% endblock %}
